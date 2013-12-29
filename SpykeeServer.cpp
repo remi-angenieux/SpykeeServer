@@ -7,7 +7,6 @@
 
 #include "headers/SpykeeServer.h"
 
-
 /*
  * Private
  */
@@ -16,16 +15,67 @@ struct sockaddr_in server, client;
 pthread_t snifferThread;
 
 SpykeeServer::SpykeeServer() {
-	// TODO Auto-generated constructor stub
 
 }
 
 int main(int argc, char *argv[]) {
-	SpykeeServer *server = new SpykeeServer();
-	server->launcherServer();
+	/*SpykeeServer *server = new SpykeeServer();
+	server->launcherServer();*/
+
+	const std::string configFile="../config/robots.xml";
+	FILE *f = std::fopen(configFile.c_str(), "r");
+	if (f == NULL){
+		//TODO gérer les erreurs
+	}
+	tinyxml2::XMLDocument xmlFile;
+	if ( xmlFile.LoadFile(f) != tinyxml2::XML_NO_ERROR){
+		//TODO gérer les erreurs
+	}
+
+	tinyxml2::XMLNode *currentNode = xmlFile.FirstChildElement("robots")->FirstChildElement("robot");
+
+	std::string name, ip, username, password;
+	int id, port;
+	// To store all instance of SpykeeServerRobot
+	std::vector<SpykeeServerRobot> robots;
+	robots.reserve(2); // Minimum 2 robots is expected
+	// To store all thread
+	std::vector<std::thread> threads;
+	threads.reserve(2); // Minimum 2 thread is expected (2 robots)
+	do{
+		if (atoi(currentNode->FirstChildElement("enabled")->GetText()) == 1){
+			// TODO gérer les erreurs
+			id = atoi(currentNode->FirstChildElement("id")->GetText());
+			name = currentNode->FirstChildElement("name")->GetText();
+			ip = currentNode->FirstChildElement("ipAddress")->GetText();
+			port = atoi(currentNode->FirstChildElement("port")->GetText());
+			username = currentNode->FirstChildElement("username")->GetText();
+			password = currentNode->FirstChildElement("password")->GetText();
+
+			try{
+				robots.push_back(SpykeeServerRobot(id, name, ip, port, username, password));
+				//std::thread(&SpykeeServerRobot::launch, currentRobot);
+				threads.push_back(std::thread(&SpykeeServerRobot::launch, &robots.back()));
+				/*currentRobot.launch();
+				std::thread()*/
+			}
+			catch (SpykeeServerException &e) {
+				// TODO Gérer les erreurs
+			}
+		}
+	}
+	while ( (currentNode = currentNode->NextSibling()) );
+
+	std::fclose(f); // Close the XML file
+
+	sleep(25);
+
+
+	// TODO Lancer le serveur "Frontal"
+	// pthread_exit(NULL) // To wait all thread (but kill first main) or pthread_join
 }
 
-void SpykeeServer::launcherServer(){
+/*void SpykeeServer::launcherServer(){
 		//Create socket
 		this->socketMaster = socket(AF_INET, SOCK_STREAM, 0);
 		if (this->socketMaster == -1) {
@@ -80,7 +130,7 @@ void SpykeeServer::launcherServer(){
 /*
  * This will handle connection for each client
  * */
-void *SpykeeServer::connection_handler(void *socket_desc) {
+/*void *SpykeeServer::connection_handler(void *socket_desc) {
 	//Get the socket descriptor
 	int sock = *(int*) socket_desc;
 	int read_size;
@@ -111,9 +161,8 @@ void *SpykeeServer::connection_handler(void *socket_desc) {
 	free(socket_desc);
 
 	return 0;
-}
+}*/
 
 SpykeeServer::~SpykeeServer() {
-	// TODO Auto-generated destructor stub
 }
 

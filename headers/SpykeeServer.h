@@ -16,7 +16,15 @@
 #include<sys/socket.h>
 #include<arpa/inet.h> //inet_addr
 #include<unistd.h>    //write
-#include<pthread.h>
+//#include<pthread.h>
+
+#include <vector> // To store all instance of SpykeeServerRobot
+#include <cstdio> // To open XML file
+#include "../libs/tinyXML2/tinyxml2.h" // To parse XML Files
+#include <stdlib.h> // Convert a char* to int
+#include <thread> // To use thread
+#include "SpykeeServerRobot.h"
+#include "SpykeeServerException.h"
 
 class SpykeeServer {
 
@@ -25,8 +33,8 @@ public:
 	virtual ~SpykeeServer();
 	int main(int argc, char *argv[]);
 
-	void launcherServer();
-	static void *connection_handler(void *socket_desc);
+	/*void launcherServer();
+	static void *connection_handler(void *socket_desc);*/
 
 private:
 	int socketMaster;

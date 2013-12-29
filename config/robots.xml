@@ -1,0 +1,33 @@
+<robots>
+	<robot>
+		<enabled>1</enabled>
+		<id>0</id>
+		<name>George</name>
+		<ipAddress>192.168.10.2</ipAddress>
+		<port>9000</port>
+		<username>admin</username>
+		<password>admin</password>
+		<defaultSpeed>100</defaultSpeed>
+		
+		<logLevel>3</logLevel>
+		<timeZone>Europe/Paris</timeZone>
+		<timeFormat>[d/m/y] à H:i:s</timeFormat>
+		<logFile>../logs/George-robot.log</logFile>
+	</robot>
+	
+	<robot>
+		<enabled>1</enabled>
+		<id>1</id>
+		<name>Sylvie</name>
+		<ipAddress>192.168.10.3</ipAddress>
+		<port>9000</port>
+		<username>admin</username>
+		<password>admin</password>
+		<defaultSpeed>100</defaultSpeed>
+		
+		<logLevel>3</logLevel>
+		<timeZone>Europe/Paris</timeZone>
+		<timeFormat>[d/m/y] à H:i:s</timeFormat>
+		<logFile>../logs/Sylvie-robot.log</logFile>
+	</robot>
+</robots>
