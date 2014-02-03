@@ -32,10 +32,17 @@ int main(int argc, char *argv[]) {
 		//TODO gérer les erreurs
 	}
 
-	tinyxml2::XMLNode *currentNode = xmlFile.FirstChildElement("robots")->FirstChildElement("robot");
+	std::vector<std::string> ipAllowed;
+	tinyxml2::XMLElement *currentElement = xmlFile.FirstChildElement("controller")->FirstChildElement("config")->FirstChildElement("ipAllowed");
+	do{
+		ipAllowed.push_back(currentElement->GetText());
+	}
+	while ( (currentElement = currentElement->NextSiblingElement("ipAllowed")) );
+
+	tinyxml2::XMLNode *currentNode = xmlFile.FirstChildElement("controller")->FirstChildElement("robots")->FirstChildElement("robot");
 
 	std::string name, ip, username, password;
-	int id, port;
+	int id, controllerPort, defaultSpeed;
 	// To store all instance of SpykeeServerRobot
 	std::vector<SpykeeServerRobot> robots;
 	robots.reserve(2); // Minimum 2 robots is expected
@@ -48,18 +55,19 @@ int main(int argc, char *argv[]) {
 			id = atoi(currentNode->FirstChildElement("id")->GetText());
 			name = currentNode->FirstChildElement("name")->GetText();
 			ip = currentNode->FirstChildElement("ipAddress")->GetText();
-			port = atoi(currentNode->FirstChildElement("port")->GetText());
+			controllerPort = atoi(currentNode->FirstChildElement("controllerPort")->GetText());
 			username = currentNode->FirstChildElement("username")->GetText();
 			password = currentNode->FirstChildElement("password")->GetText();
+			defaultSpeed = atoi(currentNode->FirstChildElement("defaultSpeed")->GetText());
 
 			try{
-				robots.push_back(SpykeeServerRobot(id, name, ip, port, username, password));
-				//std::thread(&SpykeeServerRobot::launch, currentRobot);
-				threads.push_back(std::thread(&SpykeeServerRobot::launch, &robots.back()));
-				/*currentRobot.launch();
-				std::thread()*/
+				robots.push_back(SpykeeServerRobot(id, name, ip, controllerPort, username, password, defaultSpeed, ipAllowed));
+				threads.push_back(std::thread(&SpykeeServerRobot::test3_, &robots.back()));
 			}
 			catch (SpykeeServerException &e) {
+				std::cout << "ERREUR : " << e.what() << std::endl;
+				std::cout << "MESSAGE : " << e.getErDescription() << std::endl;
+				std::cout << "PORT : " << controllerPort << std::endl;
 				// TODO Gérer les erreurs
 			}
 		}
@@ -68,11 +76,14 @@ int main(int argc, char *argv[]) {
 
 	std::fclose(f); // Close the XML file
 
-	sleep(25);
-
-
 	// TODO Lancer le serveur "Frontal"
-	// pthread_exit(NULL) // To wait all thread (but kill first main) or pthread_join
+
+	for(auto& t : threads){
+		t.join();
+	}
+
+	std::cout << "Arrêt du main" << std::endl;
+
 }
 
 /*void SpykeeServer::launcherServer(){
